@@ -1,23 +1,20 @@
-using System;
 using UnityEngine;
 
 public class HomeZoneHandler : MonoBehaviour
 {
-    private const string ThiefTag = "Thief";
-
-    public event Action OnThiefEntered;
-    public event Action OnThiefExited;
+    [SerializeField] private Sounder _sounder;
 
     private void OnTriggerEnter(Collider other)
     {
-
-        if (other.gameObject.tag == ThiefTag)
-            OnThiefEntered?.Invoke();
+        if (other.gameObject.TryGetComponent(out Thief thief))
+            ChangeSounderState(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == ThiefTag)
-            OnThiefExited?.Invoke();
+        if(other.gameObject.TryGetComponent(out Thief thief))
+            ChangeSounderState(false);
     }
+
+    private void ChangeSounderState(bool state) => _sounder.ChangeState(state);
 }

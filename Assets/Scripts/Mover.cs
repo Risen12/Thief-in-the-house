@@ -8,7 +8,6 @@ public class Mover : MonoBehaviour
 
     private readonly int _moveTrigger = Animator.StringToHash("Move");
     private readonly int _standTrigger = Animator.StringToHash("Stand");
-    private readonly int _runTrigger = Animator.StringToHash("Run");
 
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _rotationSpeed;
@@ -51,10 +50,5 @@ public class Mover : MonoBehaviour
         float rotation = Input.GetAxis(Horizontal);
 
         transform.Rotate(rotation * _rotationSpeed * Time.deltaTime * Vector3.up);
-    }
-
-    private void Run()
-    { 
-        
     }
 }

@@ -1,91 +1,63 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(AudioSource), typeof(Animator))]
 public class Sounder : MonoBehaviour
 {
     private const string ThiefInHouseState = "IsThiefInHouse";
 
-    [SerializeField] private HomeZoneHandler _homeZone;
     [SerializeField] private AudioClip _sound;
     [SerializeField] private float _changeVolumeSpeed;
 
     private AudioSource _audioSource;
-    private bool _isThiefInHouse;
-    private Coroutine _raiseSound;
-    private Coroutine _decreaseSound;
+    private Coroutine _changeVolumeCoroutine;
     private Animator _animator;
+    private float _activateVolume;
+    private float _deactivateVolume;
 
-    private void OnEnable()
-    {
-        _homeZone.OnThiefEntered += () => 
-        { 
-            _isThiefInHouse = true;
-            _animator.SetBool(ThiefInHouseState, _isThiefInHouse);
-            _raiseSound = StartCoroutine(RaiseSound());
-            Stop(_decreaseSound);
-        };
-        _homeZone.OnThiefExited += () => 
-        { 
-            _isThiefInHouse = false;
-            _animator.SetBool(ThiefInHouseState, _isThiefInHouse);
-            _decreaseSound = StartCoroutine(DecreaseSound());
-            Stop(_raiseSound);
-        };
-    }
-
-    private void OnDisable()
-    {
-        _homeZone.OnThiefEntered -= () =>
-        {
-            _isThiefInHouse = true;
-            _raiseSound = StartCoroutine(RaiseSound());
-            Stop(_decreaseSound);
-        };
-        _homeZone.OnThiefExited -= () =>
-        {
-            _isThiefInHouse = false;
-            _decreaseSound = StartCoroutine(DecreaseSound());
-            Stop(_raiseSound);
-        };
-
-        Stop(_decreaseSound);
-        Stop(_raiseSound);
-    }
+    public event Action<bool> OnChangeState;
 
     private void Start()
     {
         _audioSource = GetComponent<AudioSource>();
         _audioSource.clip = _sound;
-        _isThiefInHouse = false;
         _audioSource.volume = 0f;
-        _audioSource.Play();
         _animator = GetComponent<Animator>();
+
+        _activateVolume = 1f;
+        _deactivateVolume = 0f;
+
+        _audioSource.Play();
     }
 
-    private IEnumerator RaiseSound()
+    public void ChangeState(bool state)
     {
-        float maxVolume = 1f;
+        _animator.SetBool(ThiefInHouseState, state);
+        OnChangeState?.Invoke(state);
 
-        while (_isThiefInHouse)
+        Stop(_changeVolumeCoroutine);
+
+        if (state)
         {
-            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, maxVolume, _changeVolumeSpeed * Time.deltaTime);
-
-            yield return null;
+            _changeVolumeCoroutine = StartCoroutine(ChangeVolume(_activateVolume));
+        }
+        else
+        {
+            _changeVolumeCoroutine = StartCoroutine(ChangeVolume(_deactivateVolume));
         }
     }
 
-    private IEnumerator DecreaseSound()
+    private IEnumerator ChangeVolume(float volume)
     {
-        float minVolume = 0f;
-
-        while (_isThiefInHouse == false)
+        while (_audioSource.volume != volume)
         {
-            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, minVolume, _changeVolumeSpeed * Time.deltaTime);
+            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, volume, _changeVolumeSpeed * Time.deltaTime);
 
             yield return null;
         }
+
+        yield break;
     }
 
     private void Stop(Coroutine coroutine)
