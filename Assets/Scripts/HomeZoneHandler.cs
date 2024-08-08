@@ -7,14 +7,12 @@ public class HomeZoneHandler : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.TryGetComponent(out Thief thief))
-            ChangeSounderState(true);
+            _sounder.IncreaseSound();
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if(other.gameObject.TryGetComponent(out Thief thief))
-            ChangeSounderState(false);
+        if (other.gameObject.TryGetComponent(out Thief thief))
+            _sounder.DecreaseSound();
     }
-
-    private void ChangeSounderState(bool state) => _sounder.ChangeState(state);
 }

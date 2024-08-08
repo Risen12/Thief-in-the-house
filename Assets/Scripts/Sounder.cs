@@ -31,7 +31,11 @@ public class Sounder : MonoBehaviour
         _audioSource.Play();
     }
 
-    public void ChangeState(bool state)
+    public void IncreaseSound() => ChangeState(true);
+
+    public void DecreaseSound() => ChangeState(false);
+
+    private void ChangeState(bool state)
     {
         _animator.SetBool(ThiefInHouseState, state);
         OnChangeState?.Invoke(state);

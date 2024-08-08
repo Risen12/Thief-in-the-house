@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-public class Liver : MonoBehaviour
+public class Inhabitant : MonoBehaviour
 {
     private const string DogBarkingParameterName = "IsDogBarking";
 
